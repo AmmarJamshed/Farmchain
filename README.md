@@ -1,2 +1,2 @@
 # Farmchain
-Agri + AI deployment
+Agri blockchain + AI deployment
