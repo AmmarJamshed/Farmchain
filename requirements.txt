@@ -3,3 +3,4 @@ web3
 pandas
 statsmodels
 matplotlib
+streamlit-js-eval
