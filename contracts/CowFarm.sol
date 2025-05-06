@@ -17,6 +17,7 @@ contract CowFarm {
     event CowStored(uint cowId, address owner, address farm);
     event MonthlyFeePaid(uint cowId, address farm, uint amount);
     event MilkCommissionPaid(uint cowId, address owner, uint amount);
+    
 
     function storeCow(address farm, uint monthlyFee, uint milkCommission) public {
         cows[cowCounter] = Cow(cowCounter, msg.sender, farm, true, monthlyFee, milkCommission);
@@ -36,5 +37,15 @@ contract CowFarm {
         require(msg.value == cows[cowId].milkCommission, "Incorrect commission");
         payable(cows[cowId].owner).transfer(msg.value);
         emit MilkCommissionPaid(cowId, cows[cowId].owner, msg.value);
+    }
+
+    // Add this to fix the fallback error
+    fallback() external payable {
+        // Accept unknown function calls
+    }
+
+    // Optional if you want to accept ETH with no calldata
+    receive() external payable {
+        // Accept ETH directly
     }
 }
