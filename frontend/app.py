@@ -1,5 +1,6 @@
 import streamlit as st
-from ai_model import forecast_price
+sys.path.append(os.path.abspath(".."))
+from ai.ai_model import forecast_price
 import pandas as pd
 from web3 import Web3
 import json
