@@ -24,13 +24,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ------------------------------
-# Step 1: Connect to Infura Ethereum Mainnet
+# Step 1: Connect to Sepolia via Infura
 # ------------------------------
-infura_url = "https://mainnet.infura.io/v3/0x0C5996E38D7B3b00e15F916AafF7Ef987a1A90f1"
+infura_url = "https://sepolia.infura.io/v3/40915988fef54b268deda92af3e2ba66"
 web3 = Web3(Web3.HTTPProvider(infura_url))
 
 if web3.is_connected():
-    st.success("✅ Connected to Ethereum Mainnet via Infura")
+    st.success("✅ Connected to Sepolia Testnet via Infura")
 else:
     st.error("❌ Failed to connect to Ethereum network")
 
@@ -45,9 +45,8 @@ except Exception as e:
     st.error(f"Error loading ABI: {e}")
     st.stop()
 
-# Deployed contract address
+# Deployed contract address (on Sepolia)
 contract_address = "0x0C5996E38D7B3b00e15F916AafF7Ef987a1A90f1"
-
 
 # Contract instance
 try:
