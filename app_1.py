@@ -26,7 +26,7 @@ st.markdown("""
 # ------------------------------
 # Step 1: Connect to Infura Ethereum Mainnet
 # ------------------------------
-infura_url = "https://mainnet.infura.io/v3/40915988fef54b268deda92af3e2ba66"
+infura_url = "https://mainnet.infura.io/v3/0x0C5996E38D7B3b00e15F916AafF7Ef987a1A90f1"
 web3 = Web3(Web3.HTTPProvider(infura_url))
 
 if web3.is_connected():
@@ -46,7 +46,8 @@ except Exception as e:
     st.stop()
 
 # Deployed contract address
-contract_address = "0xd9145CCE52D386f254917e481eB44e9943F39138"
+contract_address = "0x0C5996E38D7B3b00e15F916AafF7Ef987a1A90f1"
+
 
 # Contract instance
 try:
