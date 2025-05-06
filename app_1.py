@@ -11,11 +11,12 @@ st.title("🐮 CowFarm Smart Contract Interface")
 # ------------------------------
 st.subheader("🦊 Connect MetaMask Wallet")
 
-wallet_address = streamlit_js_eval(js_expressions="window.ethereum.selectedAddress", key="wallet")
-if wallet_address:
-    st.success(f"🦊 Connected Wallet: {wallet_address}")
-else:
-    st.info("🔌 Please connect your MetaMask wallet below.")
+wallet_address = streamlit_js_eval(
+    js_expressions="""
+    window.ethereum.request({ method: 'eth_requestAccounts' }).then(accounts => accounts[0]);
+    """,
+    key="connect_wallet"
+)
 
 st.markdown("""
     <button onclick="window.ethereum.request({ method: 'eth_requestAccounts' })">
