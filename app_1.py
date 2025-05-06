@@ -1,77 +1,67 @@
 import streamlit as st
-import sys
-import os
-sys.path.append(os.path.abspath(".."))
-from ai_model import forecast_price
-import pandas as pd
 from web3 import Web3
 import json
 
-st.title("🐄 Decentralized Cow Farming + AI Price Forecasting")
+st.set_page_config(page_title="CowFarm DApp", layout="centered")
+st.title("🐮 CowFarm Smart Contract Interface")
 
-# Connect to Blockchain
-infura_url = 'https://rpc-mumbai.maticvigil.com'
+# ------------------------------
+# Step 1: Connect to Web3 provider
+# ------------------------------
+infura_url = "https://rpc.sepolia.org"  # Change this if using a different provider
 web3 = Web3(Web3.HTTPProvider(infura_url))
 
-contract_address = "0xYOUR_CONTRACT_ADDRESS"
-with open('CowFarm.json') as f:
-    abi = json.load(f)
+if web3.is_connected():
+    st.success("✅ Connected to Ethereum network")
+else:
+    st.error("❌ Failed to connect to Ethereum")
 
+# ------------------------------
+# Step 2: Load ABI and Contract
+# ------------------------------
+with open("CowFarm.json") as f:
+    contract_json = json.load(f)
+    abi = contract_json["abi"]
+
+# Deployed contract address
+contract_address = "0xd9145CCE52D386f254917e481eB44e9943F39138"
+
+# Contract instance
 contract = web3.eth.contract(address=contract_address, abi=abi)
 
-# Wallet connection
-private_key = st.text_input("Enter your private key:", type="password")
-wallet_address = web3.eth.account.privateKeyToAccount(private_key).address if private_key else None
+# ------------------------------
+# Step 3: Show current cow counter
+# ------------------------------
+if st.button("Check Total Cows"):
+    try:
+        cow_count = contract.functions.cowCounter().call()
+        st.info(f"🐄 Total Cows Stored: {cow_count}")
+    except Exception as e:
+        st.error(f"Error fetching cow count: {e}")
 
-# Features
-tab1, tab2, tab3 = st.tabs(["📦 Store Cow", "💵 Payments", "📈 Forecast Prices"])
+# ------------------------------
+# Step 4: Interact with `storeCow`
+# ------------------------------
+st.subheader("📦 Store a New Cow")
 
-with tab1:
-    st.subheader("📦 Store Your Cow on a Farm")
-    farm_address = st.text_input("Farm Wallet Address")
-    monthly_fee = st.number_input("Monthly Fee", min_value=0)
-    milk_fee = st.number_input("Milk Commission Fee", min_value=0)
-    if st.button("Store Cow"):
-        nonce = web3.eth.get_transaction_count(wallet_address)
-        txn = contract.functions.storeCow(farm_address, monthly_fee, milk_fee).build_transaction({
-            'chainId': 80001,
-            'gas': 3000000,
-            'gasPrice': web3.to_wei('5', 'gwei'),
-            'nonce': nonce
-        })
-        signed = web3.eth.account.sign_transaction(txn, private_key)
-        tx_hash = web3.eth.send_raw_transaction(signed.rawTransaction)
-        st.success(f"Cow stored! TxHash: {tx_hash.hex()}")
+with st.form("store_cow_form"):
+    farm_address = st.text_input("Farm Address", placeholder="0x...")
+    monthly_fee = st.number_input("Monthly Fee (wei)", min_value=0)
+    milk_commission = st.number_input("Milk Commission (wei)", min_value=0)
+    submitted = st.form_submit_button("Store Cow")
 
-with tab2:
-    st.subheader("💵 Make or Receive Payments")
-    cow_id = st.number_input("Cow ID", min_value=0)
-    amount = st.number_input("Payment Amount in ETH", min_value=0.001)
-    tx_type = st.selectbox("Payment Type", ["Pay Farm", "Pay Owner"])
-    if st.button("Send Payment"):
-        nonce = web3.eth.get_transaction_count(wallet_address)
-        if tx_type == "Pay Farm":
-            txn = contract.functions.payFarm(cow_id).build_transaction({
-                'chainId': 80001,
-                'gas': 3000000,
-                'gasPrice': web3.to_wei('5', 'gwei'),
-                'nonce': nonce,
-                'value': web3.to_wei(amount, 'ether')
-            })
-        else:
-            txn = contract.functions.payMilkCommission(cow_id).build_transaction({
-                'chainId': 80001,
-                'gas': 3000000,
-                'gasPrice': web3.to_wei('5', 'gwei'),
-                'nonce': nonce,
-                'value': web3.to_wei(amount, 'ether')
-            })
+    if submitted:
+        try:
+            # Replace with actual account and private key if signing is needed
+            st.warning("This will only work with Web3 wallet integration or backend signing.")
+            st.code(f"contract.functions.storeCow('{farm_address}', {monthly_fee}, {milk_commission}).transact(...)")
+            st.success("Mock call generated. Add transaction logic for full deployment.")
+        except Exception as e:
+            st.error(f"Error: {e}")
 
-        signed = web3.eth.account.sign_transaction(txn, private_key)
-        tx_hash = web3.eth.send_raw_transaction(signed.rawTransaction)
-        st.success(f"Payment sent! TxHash: {tx_hash.hex()}")
-
-with tab3:
-    st.subheader("📈 AI-Based Cow Price Forecast")
-    forecast = forecast_price()
-    st.line_chart(forecast)
+# ------------------------------
+# Step 5: Display Contract Events (Optional)
+# ------------------------------
+st.subheader("🧾 Smart Contract Info")
+st.write(f"📍 Contract Address: `{contract_address}`")
+st.write("🔧 Contract ABI Loaded:", type(abi))
