@@ -1,4 +1,6 @@
 import streamlit as st
+import sys
+import os
 sys.path.append(os.path.abspath(".."))
 from ai.ai_model import forecast_price
 import pandas as pd
