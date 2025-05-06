@@ -14,7 +14,7 @@ infura_url = 'https://rpc-mumbai.maticvigil.com'
 web3 = Web3(Web3.HTTPProvider(infura_url))
 
 contract_address = "0xYOUR_CONTRACT_ADDRESS"
-with open('CowFarmABI.json') as f:
+with open('CowFarm.json') as f:
     abi = json.load(f)
 
 contract = web3.eth.contract(address=contract_address, abi=abi)
