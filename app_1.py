@@ -1,9 +1,27 @@
 import streamlit as st
 from web3 import Web3
 import json
+from streamlit_js_eval import streamlit_js_eval
 
 st.set_page_config(page_title="CowFarm DApp", layout="centered")
 st.title("🐮 CowFarm Smart Contract Interface")
+
+# ------------------------------
+# Step 0: MetaMask Wallet Connection (JS-based)
+# ------------------------------
+st.subheader("🦊 Connect MetaMask Wallet")
+
+wallet_address = streamlit_js_eval(js_expressions="window.ethereum.selectedAddress", key="wallet")
+if wallet_address:
+    st.success(f"🦊 Connected Wallet: {wallet_address}")
+else:
+    st.info("🔌 Please connect your MetaMask wallet below.")
+
+st.markdown("""
+    <button onclick="window.ethereum.request({ method: 'eth_requestAccounts' })">
+        👉 Connect MetaMask
+    </button>
+""", unsafe_allow_html=True)
 
 # ------------------------------
 # Step 1: Connect to Infura Ethereum Mainnet
@@ -59,12 +77,12 @@ with st.form("store_cow_form"):
     submitted = st.form_submit_button("Store Cow")
 
     if submitted:
-        try:
-            st.warning("⚠️ Transactions cannot be signed without a connected wallet or private key.")
-            st.code(f"contract.functions.storeCow('{farm_address}', {monthly_fee}, {milk_commission}).transact(...)")
-            st.success("🔄 Mock call displayed. Set up wallet signing to enable.")
-        except Exception as e:
-            st.error(f"Error: {e}")
+        if not wallet_address:
+            st.warning("⚠️ Please connect MetaMask first.")
+        else:
+            st.warning("⚠️ Transactions cannot yet be signed in browser (MetaMask connected, no signer).")
+            st.code(f"contract.functions.storeCow('{farm_address}', {monthly_fee}, {milk_commission}).transact(from={wallet_address})")
+            st.success("🔄 MetaMask address connected. Frontend signing can now be added.")
 
 # ------------------------------
 # Step 5: Display Contract Info
