@@ -8,20 +8,20 @@ from sklearn.ensemble import RandomForestRegressor
 import pickle
 
 # ------------------ Page Config ------------------ #
-st.set_page_config(page_title="🧠 CowFarm AI Forecast DApp", layout="centered")
+st.set_page_config(page_title="🧠 CowFarm AI Forecast DApp", layout="wide")
 
 # ------------------ Custom Styling ------------------ #
 st.markdown("""
     <style>
     body {
-        background-color: #0d0c1d;
+        background-color: #f4f4f9;
     }
     .stApp {
-        background-color: #0d0c1d;
-        color: #00FFAA;
+        background-color: #f4f4f9;
+        color: #333333;
     }
     h1, h2, h3, h4 {
-        color: #B388EB;
+        color: #4B0082;
     }
     .stButton>button {
         background-color: #00FFAA;
@@ -30,8 +30,8 @@ st.markdown("""
         border-radius: 10px;
     }
     .stTextInput>div>div>input, .stNumberInput>div>div>input {
-        background-color: #1f1f2e;
-        color: #00FFAA;
+        background-color: #ffffff;
+        color: #333333;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -102,29 +102,28 @@ with st.form("onboard_form"):
 # ------------------ Cow Price Forecast ------------------ #
 st.header("📈 AI Forecast Cow Price")
 
-st.markdown("Fill in cow details to predict market price using AI model:")
-
-with st.form("forecast_form"):
+with st.sidebar:
+    st.markdown("### Fill in cow details to predict market price using AI model:")
     breed = st.selectbox("Breed", ["Sahiwal", "Friesian", "Jersey", "Crossbred"])
     age = st.slider("Age (months)", 6, 120)
     weight = st.slider("Weight (kg)", 100, 800)
     health_score = st.slider("Health Score (0 - 10)", 0.0, 10.0, step=0.1)
     milk_output = st.slider("Milk Output (liters/day)", 0, 50)
-    submit_forecast = st.form_submit_button("🔮 Predict Price")
+    submit_forecast = st.button("🔮 Predict Price")
 
-    if submit_forecast:
-        try:
-            # Simulated model (replace with actual model)
-            features = pd.DataFrame([[breed, age, weight, health_score, milk_output]],
-                                    columns=["breed", "age", "weight", "health", "milk"])
-            breed_map = {"Sahiwal": 0, "Friesian": 1, "Jersey": 2, "Crossbred": 3}
-            features["breed"] = features["breed"].map(breed_map)
-            model = RandomForestRegressor()
-            model.fit(np.array([[0, 24, 300, 8.0, 10]]), [70000])  # Dummy fit
-            prediction = model.predict(features)[0]
-            st.success(f"💰 Predicted Cow Price: PKR {int(prediction):,}")
-        except Exception as e:
-            st.error(f"Prediction error: {e}")
+if submit_forecast:
+    try:
+        # Simulated model (replace with actual model)
+        features = pd.DataFrame([[breed, age, weight, health_score, milk_output]],
+                                columns=["breed", "age", "weight", "health", "milk"])
+        breed_map = {"Sahiwal": 0, "Friesian": 1, "Jersey": 2, "Crossbred": 3}
+        features["breed"] = features["breed"].map(breed_map)
+        model = RandomForestRegressor()
+        model.fit(np.array([[0, 24, 300, 8.0, 10]]), [70000])  # Dummy fit
+        prediction = model.predict(features)[0]
+        st.success(f"💰 Predicted Cow Price: PKR {int(prediction):,}")
+    except Exception as e:
+        st.error(f"Prediction error: {e}")
 
 # ------------------ Cow Count ------------------ #
 st.header("🐄 Total Cows on Blockchain")
