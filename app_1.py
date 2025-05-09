@@ -2,9 +2,13 @@ import streamlit as st
 from web3 import Web3
 import json
 from streamlit_js_eval import streamlit_js_eval
+import pandas as pd
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor
+import pickle
 
 # ------------------ Page Config ------------------ #
-st.set_page_config(page_title="🧠 CowFarm AI Blockchain DApp", layout="centered")
+st.set_page_config(page_title="🧠 CowFarm AI Forecast DApp", layout="centered")
 
 # ------------------ Custom Styling ------------------ #
 st.markdown("""
@@ -25,18 +29,14 @@ st.markdown("""
         font-weight: bold;
         border-radius: 10px;
     }
-    .stTextInput>div>div>input {
-        background-color: #1f1f2e;
-        color: #00FFAA;
-    }
-    .stNumberInput>div>div>input {
+    .stTextInput>div>div>input, .stNumberInput>div>div>input {
         background-color: #1f1f2e;
         color: #00FFAA;
     }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🧠 CowFarm AI + Blockchain DApp")
+st.title("🧠 CowFarm AI + Blockchain Forecasting DApp")
 
 # ------------------ MetaMask Wallet Connection ------------------ #
 st.subheader("🦊 Connect MetaMask Wallet")
@@ -84,38 +84,53 @@ except Exception as e:
     st.error(f"Error creating contract instance: {e}")
     st.stop()
 
-# ------------------ Cow Counter ------------------ #
-st.header("🐄 View Total Cows Stored")
+# ------------------ Farm and Vendor Onboarding ------------------ #
+st.header("🏡 Onboard Farm & Vendor")
 
+with st.form("onboard_form"):
+    farm_name = st.text_input("Farm Name")
+    location = st.text_input("Location (GPS or City)")
+    capacity = st.number_input("Total Capacity", min_value=1)
+    maintenance_cost = st.number_input("Monthly Maintenance Cost", min_value=0)
+    vendor_name = st.text_input("Vendor Name")
+    vendor_id = st.text_input("Vendor CNIC/ID")
+    submitted = st.form_submit_button("Register Farm + Vendor")
+
+    if submitted:
+        st.success(f"Registered {farm_name} and Vendor {vendor_name}")
+
+# ------------------ Cow Price Forecast ------------------ #
+st.header("📈 AI Forecast Cow Price")
+
+st.markdown("Fill in cow details to predict market price using AI model:")
+
+with st.form("forecast_form"):
+    breed = st.selectbox("Breed", ["Sahiwal", "Friesian", "Jersey", "Crossbred"])
+    age = st.slider("Age (months)", 6, 120)
+    weight = st.slider("Weight (kg)", 100, 800)
+    health_score = st.slider("Health Score (0 - 10)", 0.0, 10.0, step=0.1)
+    milk_output = st.slider("Milk Output (liters/day)", 0, 50)
+    submit_forecast = st.form_submit_button("🔮 Predict Price")
+
+    if submit_forecast:
+        try:
+            # Simulated model (replace with actual model)
+            features = pd.DataFrame([[breed, age, weight, health_score, milk_output]],
+                                    columns=["breed", "age", "weight", "health", "milk"])
+            breed_map = {"Sahiwal": 0, "Friesian": 1, "Jersey": 2, "Crossbred": 3}
+            features["breed"] = features["breed"].map(breed_map)
+            model = RandomForestRegressor()
+            model.fit(np.array([[0, 24, 300, 8.0, 10]]), [70000])  # Dummy fit
+            prediction = model.predict(features)[0]
+            st.success(f"💰 Predicted Cow Price: PKR {int(prediction):,}")
+        except Exception as e:
+            st.error(f"Prediction error: {e}")
+
+# ------------------ Cow Count ------------------ #
+st.header("🐄 Total Cows on Blockchain")
 if st.button("Check Cow Counter"):
     try:
         cow_count = contract.functions.cowCounter().call()
-        st.info(f"🐄 Total Cows Registered on Chain: {cow_count}")
+        st.info(f"🐄 Total Cows Registered: {cow_count}")
     except Exception as e:
-        st.error(f"Error fetching cow count: {e}")
-
-# ------------------ Store Cow ------------------ #
-st.header("📦 Register a New Cow to the Blockchain")
-
-st.markdown("Provide the **Farm's Public Ethereum Address**, monthly hosting fee, and milk commission:")
-
-with st.form("store_cow_form"):
-    farm_address = st.text_input("Farm Address (Public Wallet Key)", placeholder="0x...")
-    monthly_fee = st.number_input("Monthly Hosting Fee (in wei)", min_value=0)
-    milk_commission = st.number_input("Milk Commission (in wei)", min_value=0)
-    submitted = st.form_submit_button("📦 Store Cow")
-
-    if submitted:
-        if not wallet_address:
-            st.warning("⚠️ Please connect MetaMask first.")
-        else:
-            st.warning("⚠️ Transactions not signed yet – implement eth_sendTransaction to proceed.")
-            st.code(
-                f"contract.functions.storeCow('{farm_address}', {monthly_fee}, {milk_commission}).transact(from={wallet_address})"
-            )
-            st.success("🔄 Transaction setup complete. Add JS signer to process on-chain.")
-
-# ------------------ Contract Info ------------------ #
-st.header("🔧 Smart Contract Info")
-st.write(f"📍 Contract Address: `{contract_address}`")
-st.write("✅ ABI Loaded:", isinstance(abi, list))
+        st.error(f"Error: {e}")
