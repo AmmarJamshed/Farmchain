@@ -1,6 +1,6 @@
 streamlit
 web3
 pandas
-statsmodels
-matplotlib
+numpy
+scikit-learn
 streamlit-js-eval
