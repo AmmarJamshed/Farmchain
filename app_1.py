@@ -4,7 +4,6 @@ import json
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
-import streamlit.components.v1 as components
 
 # ------------------ Page Config ------------------ #
 st.set_page_config(page_title="🧠 CowFarm AI Forecast DApp", layout="wide")
@@ -37,36 +36,14 @@ st.markdown("""
 
 st.title("🧠 CowFarm AI + Blockchain Forecasting DApp")
 
-# ------------------ MetaMask Wallet Connection ------------------ #
-st.subheader("🦊 Connect MetaMask Wallet")
-
-metamask_connect_button = """
-<script>
-async function connect() {
-    if (typeof window.ethereum !== 'undefined') {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const account = accounts[0];
-        const streamlitDoc = window.parent.document;
-        const input = streamlitDoc.getElementById("metamask_address_input");
-        input.value = account;
-        input.dispatchEvent(new Event("input", { bubbles: true }));
-    } else {
-        alert('MetaMask is not installed!');
-    }
-}
-</script>
-
-<button onclick="connect()">👉 Connect MetaMask</button>
-<input type="hidden" id="metamask_address_input" />
-"""
-
-components.html(metamask_connect_button, height=100)
-w_address = st.text_input("Connected Wallet", key="metamask_address_input")
+# ------------------ MetaMask Wallet Input ------------------ #
+st.subheader("🦊 Enter Your MetaMask Wallet Address")
+w_address = st.text_input("Wallet Address", placeholder="0x...")
 
 if w_address:
-    st.success(f"✅ Wallet Connected: {w_address}")
+    st.success(f"✅ Wallet Entered: {w_address}")
 else:
-    st.warning("🦊 Click the button above to connect your MetaMask")
+    st.warning("🦊 Please enter your MetaMask wallet address manually.")
 
 # ------------------ Ethereum Network Connection ------------------ #
 infura_url = "https://sepolia.infura.io/v3/40915988fef54b268deda92af3e2ba66"
