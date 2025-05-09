@@ -1,11 +1,10 @@
 import streamlit as st
 from web3 import Web3
 import json
-from streamlit_js_eval import streamlit_js_eval
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
-import pickle
+import streamlit.components.v1 as components
 
 # ------------------ Page Config ------------------ #
 st.set_page_config(page_title="🧠 CowFarm AI Forecast DApp", layout="wide")
@@ -41,21 +40,33 @@ st.title("🧠 CowFarm AI + Blockchain Forecasting DApp")
 # ------------------ MetaMask Wallet Connection ------------------ #
 st.subheader("🦊 Connect MetaMask Wallet")
 
-wallet_address = streamlit_js_eval(
-    js_expressions="window.ethereum.request({ method: 'eth_requestAccounts' }).then(accounts => accounts[0]);",
-    key="wallet_connect"
-)
+metamask_connect_button = """
+<script>
+async function connect() {
+    if (typeof window.ethereum !== 'undefined') {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const account = accounts[0];
+        const streamlitDoc = window.parent.document;
+        const input = streamlitDoc.getElementById("metamask_address_input");
+        input.value = account;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+    } else {
+        alert('MetaMask is not installed!');
+    }
+}
+</script>
 
-if wallet_address:
-    st.success(f"🦊 Wallet Connected: {wallet_address}")
+<button onclick="connect()">👉 Connect MetaMask</button>
+<input type="hidden" id="metamask_address_input" />
+"""
+
+components.html(metamask_connect_button, height=100)
+w_address = st.text_input("Connected Wallet", key="metamask_address_input")
+
+if w_address:
+    st.success(f"✅ Wallet Connected: {w_address}")
 else:
-    st.info("🔌 Please connect your MetaMask wallet below.")
-
-st.markdown("""
-    <button onclick="window.ethereum.request({ method: 'eth_requestAccounts' })">
-        👉 Connect MetaMask
-    </button>
-""", unsafe_allow_html=True)
+    st.warning("🦊 Click the button above to connect your MetaMask")
 
 # ------------------ Ethereum Network Connection ------------------ #
 infura_url = "https://sepolia.infura.io/v3/40915988fef54b268deda92af3e2ba66"
@@ -113,7 +124,6 @@ with st.sidebar:
 
 if submit_forecast:
     try:
-        # Simulated model (replace with actual model)
         features = pd.DataFrame([[breed, age, weight, health_score, milk_output]],
                                 columns=["breed", "age", "weight", "health", "milk"])
         breed_map = {"Sahiwal": 0, "Friesian": 1, "Jersey": 2, "Crossbred": 3}
